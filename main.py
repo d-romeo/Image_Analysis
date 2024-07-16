@@ -1,13 +1,12 @@
 import cv2
 import pytesseract
-import numpy as np
-from PIL import ImageGrab
-import time
+import utils as utils
+
 
 pytesseract.pytesseract.tesseract_cmd = 'C:\\Users\\danie\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe'
-img = cv2.imread('example.png')
 
-
+utils.remove_blue_borders('plates/plate3.jpg', 'plates/borderless.png')
+img = cv2.imread('plates/borderless.png')
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 pytesseract
 ##############################################
