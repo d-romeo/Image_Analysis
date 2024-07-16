@@ -1,9 +1,8 @@
-import imutils
-import numpy as np
+import random
+import os
 import matplotlib.pyplot as plt
 import cv2
-from imutils.perspective import four_point_transform
-
+import pytesseract
 
 def remove_blue_borders(image_path, output_path):
 	image = cv2.imread(image_path)
@@ -71,7 +70,7 @@ def remove_blue_borders(image_path, output_path):
 
 	# Rimuovere i bordi blu dalla targa
 	height, width, _ = cropped_image.shape
-	blue_border_width = int(width * 0.1)  # Assumiamo che i bordi blu occupino il 10% della larghezza totale
+	blue_border_width = int(width * 0.117)  # Assumiamo che i bordi blu occupino il 10% della larghezza totale
 	cropped_image_no_blue = cropped_image[:, blue_border_width:width - blue_border_width]
 
 	# Convertire l'immagine ritagliata in scala di grigi
@@ -98,5 +97,62 @@ def remove_blue_borders(image_path, output_path):
 	# Salvare l'immagine ritagliata senza bordi blu
 	cv2.imwrite(output_path, binary_plate)
 
-	plt.tight_layout()
-	plt.show()
+	#plt.tight_layout()
+	#plt.show()
+
+def select_random_plates(folder_path, max_plates=3):
+	# Lista dei file nella cartella 'plates'
+	files = os.listdir(folder_path)
+	# Filtrare solo i file che sono immagini (estensioni comuni come .jpg, .png)
+	image_files = [file for file in files if file.endswith('.jpg') or file.endswith('.png')]
+
+	# Selezionare casualmente fino a max_plates immagini
+	selected_files = random.sample(image_files, min(max_plates, len(image_files)))
+
+	# Creare i percorsi completi alle immagini selezionate
+	selected_paths = [os.path.join(folder_path, file) for file in selected_files]
+	image = selected_paths[random.randint(0, 2)]
+	print(image)
+	return image
+
+
+def request_to_join(accepted_plates):
+	pytesseract.pytesseract.tesseract_cmd = 'C:\\Users\\danie\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe'
+
+	#seleziona una targa random in plates
+	rand_plate = select_random_plates('plates/', max_plates=4)
+	#rimuovi bordi
+	remove_blue_borders(rand_plate, 'temp/borderless.png')
+
+	img = cv2.imread('temp/borderless.png')
+	img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+	pytesseract
+
+	hImg, wImg, _ = img.shape
+	boxes = pytesseract.image_to_boxes(img)
+	plate = []
+	count = 0
+
+	for b in boxes.splitlines():
+		print(b)
+		b = b.split(' ')
+		print(b)
+		x, y, w, h = int(b[1]), int(b[2]), int(b[3]), int(b[4])
+		cv2.rectangle(img, (x, hImg - y), (w, hImg - h), (50, 50, 255), 2)
+		cv2.putText(img, b[0], (x, hImg - y + 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (50, 50, 255), 2)
+
+		# evitare il 3 elemento (simbolo repubblica)
+		if count != 2:
+			plate.append(b[0])
+		count = count + 1
+
+	# to string
+	plate = ''.join(map(str, plate))
+	print(plate)
+
+	# check plate
+	if plate in accepted_plates:
+		return True
+
+	cv2.imshow('img', img)
+	cv2.waitKey(0)
