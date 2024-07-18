@@ -149,10 +149,8 @@ def request_to_join(accepted_plates):
 	# to string
 	plate = ''.join(map(str, plate))
 	print(plate)
-
+	cv2.imshow('img', img)
+	cv2.waitKey(0)
 	# check plate
 	if plate in accepted_plates:
 		return True
-
-	cv2.imshow('img', img)
-	cv2.waitKey(0)
