@@ -10,21 +10,24 @@ def remove_blue_borders(image_path, output_path):
 	# Convertire l'immagine in scala di grigi
 	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-	# Visualizzare l'immagine in scala di grigi
-	plt.figure(figsize=(12, 6))
-	plt.subplot(2, 3, 1)
-	plt.title('Grayscale Image')
-	plt.imshow(gray, cmap='gray')
+	# # Visualizzare l'immagine in scala di grigi
+	# plt.figure(figsize=(12, 6))
+	# plt.subplot(2, 3, 1)
+	# plt.title('Grayscale Image')
+	# plt.imshow(gray, cmap='gray')
 
 	# Applicare un filtro gaussiano per ridurre il rumore
 	blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 	edged = cv2.Canny(blurred, 50, 200, 255)
 
-
-	# Visualizzare l'immagine sfocata
-	plt.subplot(2, 3, 2)
-	plt.title('Edged Image')
-	plt.imshow(edged, cmap='gray')
+	# # Visualizzare l'immagine sfocata
+	# plt.subplot(2, 3, 3)
+	# plt.title('Edged Image')
+	# plt.imshow(edged, cmap='gray')
+	#
+	# plt.subplot(2, 3, 2)
+	# plt.title('Blurred Image')
+	# plt.imshow(blurred, cmap='gray')
 
 	# Applicare una soglia per creare una maschera binaria
 	_, binary = cv2.threshold(edged, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
@@ -36,10 +39,10 @@ def remove_blue_borders(image_path, output_path):
 	contour_image = image.copy()
 	cv2.drawContours(contour_image, contours, -1, (0, 255, 0), 2)
 
-	# Visualizzare i contorni trovati
-	plt.subplot(2, 3, 4)
-	plt.title('Contours')
-	plt.imshow(cv2.cvtColor(contour_image, cv2.COLOR_BGR2RGB))
+	# # Visualizzare i contorni trovati
+	# plt.subplot(2, 3, 4)
+	# plt.title('Contours')
+	# plt.imshow(cv2.cvtColor(contour_image, cv2.COLOR_BGR2RGB))
 
 	# Trovare il contorno con l'area maggiore che dovrebbe essere la targa
 	max_contour = max(contours, key=cv2.contourArea)
@@ -52,9 +55,9 @@ def remove_blue_borders(image_path, output_path):
 	cv2.rectangle(rect_image, (x, y), (x + w, y + h), (255, 0, 0), 2)
 
 	# Visualizzare il rettangolo di delimitazione
-	plt.subplot(2, 3, 5)
-	plt.title('Bounding Rect')
-	plt.imshow(cv2.cvtColor(rect_image, cv2.COLOR_BGR2RGB))
+	# plt.subplot(2, 3, 5)
+	# plt.title('Bounding Rect')
+	# plt.imshow(cv2.cvtColor(rect_image, cv2.COLOR_BGR2RGB))
 
 	# Ritagliare l'immagine per rimuovere lo sfondo
 	cropped_image = image[y:y + h, x:x + w]
@@ -63,10 +66,10 @@ def remove_blue_borders(image_path, output_path):
 	cv2.imwrite(output_path, cropped_image)
 	cropped_image = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB)
 
-	# Visualizzare l'immagine ritagliata senza sfondo
-	plt.subplot(2, 3, 6)
-	plt.title('Cropped Image')
-	plt.imshow(cropped_image)
+	# # Visualizzare l'immagine ritagliata senza sfondo
+	# plt.subplot(2, 3, 6)
+	# plt.title('Cropped Image')
+	# plt.imshow(cropped_image)
 
 	# Rimuovere i bordi blu dalla targa
 	height, width, _ = cropped_image.shape
@@ -97,8 +100,8 @@ def remove_blue_borders(image_path, output_path):
 	# Salvare l'immagine ritagliata senza bordi blu
 	cv2.imwrite(output_path, binary_plate)
 
-	#plt.tight_layout()
-	#plt.show()
+	# plt.tight_layout()
+	# plt.show()
 
 def select_random_plates(folder_path, max_plates=3):
 	# Lista dei file nella cartella 'plates'
@@ -121,6 +124,10 @@ def request_to_join(accepted_plates):
 
 	#seleziona una targa random in plates
 	rand_plate = select_random_plates('plates/', max_plates=4)
+	destination_path = ('temp/true.jpg')
+	open = cv2.imread(rand_plate, cv2.IMREAD_COLOR)
+	cv2.imwrite(destination_path, open)
+
 	#rimuovi bordi
 	remove_blue_borders(rand_plate, 'temp/borderless.png')
 
@@ -149,7 +156,9 @@ def request_to_join(accepted_plates):
 	# to string
 	plate = ''.join(map(str, plate))
 	print(plate)
-	cv2.imshow('img', img)
+	cv2.imwrite("temp/img.jpg", img)
+	#cv2.imshow('img', img)
+
 	cv2.waitKey(0)
 	# check plate
 	if plate in accepted_plates:
